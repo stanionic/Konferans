@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konferans - Chanm {{ room_id }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-video"></i> Chanm {{ room_id }}</h1>
+        <div id="videos">
+            <video id="localVideo" autoplay muted controls></video>
+            <!-- Remote videos will be added dynamically here -->
+        </div>
+        <div class="controls">
+            <button id="muteBtn" class="btn" aria-label="Toggle microphone">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <button id="videoBtn" class="btn" aria-label="Toggle camera">
+                <i class="fas fa-video"></i>
+            </button>
+            <button id="recordBtn" class="btn" aria-label="Start or stop recording">
+                <i class="fas fa-record-vinyl"></i>
+            </button>
+            <button id="leaveBtn" class="btn btn-danger" aria-label="Leave the room">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+        <div id="users"></div>
+        <div class="share-section">
+            <h3>Share Room</h3>
+            <input type="text" id="roomUrl" value="{{ url_for('room', room_id=room_id, _external=True) }}" readonly>
+            <button id="copyBtn" class="btn btn-secondary">Copy URL</button>
+            <div class="social-share">
+                <a href="https://twitter.com/intent/tweet?text=Join%20my%20conference%20room%20at%20{{ url_for('room', room_id=room_id, _external=True) }}" target="_blank" class="btn btn-secondary">
+                    <i class="fab fa-twitter"></i> Twitter
+                </a>
+                <a href="https://www.facebook.com/sharer/sharer.php?u={{ url_for('room', room_id=room_id, _external=True) }}" target="_blank" class="btn btn-secondary">
+                    <i class="fab fa-facebook"></i> Facebook
+                </a>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script>
+        const roomId = '{{ room_id }}';
+        const isOwner = {{ is_owner|tojson }};
+        initRoom(roomId);
+
+        // Copy URL functionality
+        document.getElementById('copyBtn').addEventListener('click', () => {
+            const roomUrl = document.getElementById('roomUrl');
+            roomUrl.select();
+            document.execCommand('copy');
+            alert('Room URL copied to clipboard!');
+        });
+    </script>
+</body>
+</html>
