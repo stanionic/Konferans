@@ -10,7 +10,8 @@ from datetime import datetime
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your_secret_key_here')
 app.config['SESSION_TYPE'] = 'filesystem'
-app.config['CACHE_TYPE'] = 'SimpleCache'
+app.config['CACHE_TYPE'] = 'RedisCache'
+app.config['CACHE_REDIS_URL'] = os.environ.get('REDIS_URL', 'redis://localhost:6379')
 
 Session(app)
 cache = Cache(app)
