@@ -1,0 +1,15 @@
+# Python & project
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+build/
+dist/
+
+# Flask session storage (runtime files)
+flask_session/
+
+# Local IDE files
+.vscode/
+*.swp
