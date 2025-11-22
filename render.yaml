@@ -1,11 +1,20 @@
 services:
   - type: web
-    name: konferans
-    runtime: python3
+    name: Konferans
+    env: python
     buildCommand: pip install -r requirements.txt
-    # Use eventlet worker for WebSocket support under Gunicorn
-    startCommand: gunicorn -k eventlet -w 1 wsgi:application
+    startCommand: python app.py
+    healthCheckPath: /
     envVars:
       - key: SECRET_KEY
-        value: your_secret_key_here
-    plan: free
+        fromDatabase: false
+        value: your-secret-key
+      - key: SESSION_TYPE
+        fromDatabase: false
+        value: filesystem
+      - key: CACHE_TYPE
+        fromDatabase: false
+        value: RedisCache
+      - key: REDIS_URL
+        fromDatabase: false
+        value: redis://localhost:6379
