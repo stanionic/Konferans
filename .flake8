@@ -1,0 +1,7 @@
+[flake8]
+max-line-length = 120
+exclude = .venv, .venv/*, **/site-packages/**, flask_session, venv, env, build, dist, .git
+per-file-ignores =
+    test_*.py: E402, F401
+    app.py: E302, E305
+    test_app.py: E302, E305

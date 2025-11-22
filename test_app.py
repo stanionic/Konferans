@@ -1,5 +1,7 @@
 import os
 import sys
+import uuid
+from datetime import datetime
 
 # Tests should run without a Redis instance available. Force a SimpleCache for tests
 # so cache operations succeed in local/CI environments.
@@ -7,12 +9,9 @@ os.environ.setdefault('CACHE_TYPE', 'SimpleCache')
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-from app import app, socketio, cache
-from flask import url_for
-import uuid
-from datetime import datetime
 
 def test_routes():
+    from app import app
     with app.test_client() as client:
         # Test index route
         response = client.get('/')
@@ -53,6 +52,7 @@ def test_routes():
             assert response.status_code == 302  # Should redirect to index
 
 def test_sockets():
+    from app import app, socketio, cache
     # Test socket events
     client = socketio.test_client(app)
     client.connect()
@@ -93,6 +93,7 @@ def test_sockets():
     print(f"ICE candidate event received: {received}")
 
     client.disconnect()
+
 
 if __name__ == '__main__':
     print("Testing routes...")

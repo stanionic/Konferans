@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, session, redirect, url_for
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from flask_session import Session
 from flask_caching import Cache
-import redis
 import uuid
 import os
 from datetime import datetime
@@ -37,7 +36,9 @@ def _create_cache(app):
         return Cache(app)
 
 cache = _create_cache(app)
+
 socketio = SocketIO(app, cors_allowed_origins="*")
+
 
 @app.route('/')
 def index():
@@ -79,7 +80,13 @@ def room(room_id):
     elapsed = (datetime.now() - room_data['start_time']).total_seconds() / 60
     if elapsed > 40 and room_data['credits'] <= 0:
         return redirect(url_for('index'))  # Redirect if expired
-    return render_template('room.html', room_id=room_id, is_owner=is_owner, elapsed=elapsed, credits=room_data['credits'])
+    return render_template(
+        'room.html',
+        room_id=room_id,
+        is_owner=is_owner,
+        elapsed=elapsed,
+        credits=room_data['credits'],
+    )
 
 @socketio.on('join')
 def on_join(data):
@@ -139,7 +146,11 @@ def on_answer(data):
                 return
             elif elapsed > 30 and room_data['credits'] <= 0:
                 remaining = 40 - elapsed
-                emit('warning', {'message': f'Free session ends in {remaining:.1f} minutes. Add credits to continue.'}, room=room_id)
+                message = (
+                    f'Free session ends in {remaining:.1f} minutes. '
+                    'Add credits to continue.'
+                )
+                emit('warning', {'message': message}, room=room_id)
         emit('answer', data, room=data['room'], skip_sid=request.sid)
     except Exception as e:
         print(f"Error in on_answer: {e}")
@@ -157,7 +168,11 @@ def on_ice_candidate(data):
                 return
             elif elapsed > 30 and room_data['credits'] <= 0:
                 remaining = 40 - elapsed
-                emit('warning', {'message': f'Free session ends in {remaining:.1f} minutes. Add credits to continue.'}, room=room_id)
+                message = (
+                    f'Free session ends in {remaining:.1f} minutes. '
+                    'Add credits to continue.'
+                )
+                emit('warning', {'message': message}, room=room_id)
         emit('ice_candidate', data, room=data['room'], skip_sid=request.sid)
     except Exception as e:
         print(f"Error in on_ice_candidate: {e}")
