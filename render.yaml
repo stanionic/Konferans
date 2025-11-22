@@ -3,7 +3,7 @@ services:
     name: Konferans
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: python app.py
+    startCommand: gunicorn -k eventlet -w 1 wsgi:application
     healthCheckPath: /
     envVars:
       - key: SECRET_KEY
@@ -14,7 +14,7 @@ services:
         value: filesystem
       - key: CACHE_TYPE
         fromDatabase: false
-        value: RedisCache
-      - key: REDIS_URL
-        fromDatabase: false
-        value: redis://localhost:6379
+        value: SimpleCache
+      # - key: REDIS_URL
+      #   fromDatabase: false
+      #   value: redis://localhost:6379
