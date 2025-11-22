@@ -9,12 +9,34 @@ from datetime import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your_secret_key_here')
-app.config['SESSION_TYPE'] = 'filesystem'
-app.config['CACHE_TYPE'] = 'RedisCache'
+app.config['SESSION_TYPE'] = os.environ.get('SESSION_TYPE', 'filesystem')
+# Allow overriding cache type in env; default to RedisCache for production deployments
+app.config['CACHE_TYPE'] = os.environ.get('CACHE_TYPE', 'RedisCache')
 app.config['CACHE_REDIS_URL'] = os.environ.get('REDIS_URL', 'redis://localhost:6379')
 
 Session(app)
-cache = Cache(app)
+
+# Initialize cache but fall back safely to an in-memory SimpleCache when Redis is unavailable.
+def _create_cache(app):
+    """Create and return a Cache instance. If RedisCache is configured but unavailable,
+    fall back to SimpleCache so the app remains usable in dev/test environments.
+    """
+    try:
+        cache = Cache(app)
+        # If RedisCache is in use, performs a small write/read to ensure connection succeeds.
+        if app.config.get('CACHE_TYPE') == 'RedisCache':
+            try:
+                cache.set('_cache_ping', '1', timeout=1)
+                cache.delete('_cache_ping')
+            except Exception:
+                raise
+        return cache
+    except Exception as e:
+        app.logger.warning('Cache init failed (%s). Falling back to SimpleCache.', e)
+        app.config['CACHE_TYPE'] = 'SimpleCache'
+        return Cache(app)
+
+cache = _create_cache(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 @app.route('/')

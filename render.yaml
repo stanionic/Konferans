@@ -3,7 +3,8 @@ services:
     name: konferans
     runtime: python3
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn wsgi:application
+    # Use eventlet worker for WebSocket support under Gunicorn
+    startCommand: gunicorn -k eventlet -w 1 wsgi:application
     envVars:
       - key: SECRET_KEY
         value: your_secret_key_here
