@@ -178,4 +178,6 @@ def on_ice_candidate(data):
         print(f"Error in on_ice_candidate: {e}")
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    import os
+    port = int(os.environ.get('PORT', 5000))
+    socketio.run(app, host='0.0.0.0', port=port, debug=True)
